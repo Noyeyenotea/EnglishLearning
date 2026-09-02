@@ -1,0 +1,38 @@
+# dependencies
+/node_modules
+
+# npm lock (project uses pnpm)
+package-lock.json
+
+# build output
+/dist
+/build
+
+# logs
+logs
+*.log
+npm-debug.log*
+pnpm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+
+# coverage
+/coverage
+
+# env
+.env
+.env.*.local
+
+# OS
+.DS_Store
+
+# IDE
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
+.idea
+
+# misc
+*.tsbuildinfo
+.eslintcache
