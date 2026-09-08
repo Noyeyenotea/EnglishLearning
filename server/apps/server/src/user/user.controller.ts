@@ -1,34 +1,50 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Body,
+  UseGuards,
+  UploadedFile,
+  UseInterceptors,
+  Req,
+} from '@nestjs/common';
 import { UserService } from './user.service';
-import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
+import { Token } from '@en/common/user';
+import { AuthGuard } from '@libs/shared/auth/auth.guard';
+import { FileInterceptor } from '@nestjs/platform-express';
+import type { UserLogin, UserRegister, UserUpdate } from '@en/common/user';
+import type { Request } from 'express';
 
 @Controller('user')
 export class UserController {
   constructor(private readonly userService: UserService) {}
-
-  @Post()
-  create(@Body() createUserDto: CreateUserDto) {
-    return this.userService.create(createUserDto);
+  //登录
+  @Post('login')
+  login(@Body() createUserDto: UserLogin) {
+    return this.userService.login(createUserDto);
+  }
+  //注册
+  @Post('register')
+  async register(@Body() createUserDto: UserRegister) {
+    return this.userService.register(createUserDto);
+  }
+  //刷新token 只需要一个参数 refreshToken
+  @Post('refresh-token')
+  refreshToken(@Body() createUserDto: Omit<Token, 'accessToken'>) {
+    return this.userService.refreshToken(createUserDto);
   }
 
-  @Get()
-  findAll() {
-    return this.userService.findAll();
+  //上传头像
+  @UseGuards(AuthGuard)
+  @Post('upload-avatar')
+  @UseInterceptors(FileInterceptor('file'))
+  uploadAvatar(@UploadedFile() file: Express.Multer.File) {
+    return this.userService.uploadAvatar(file);
   }
-
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.userService.findOne(+id);
-  }
-
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
-    return this.userService.update(+id, updateUserDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.userService.remove(+id);
+  //更新用户信息
+  @UseGuards(AuthGuard)
+  @Post('update-user')
+  updateUser(@Body() createUserDto: UserUpdate, @Req() req: Request) {
+    const user = req.user;
+    return this.userService.updateUser(createUserDto, user);
   }
 }
