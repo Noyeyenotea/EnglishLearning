@@ -10,9 +10,10 @@
                 <div class="flex items-center gap-2 pt-10">
                     <button
                         class="bg-indigo-700 text-white rounded-[100px] px-4 py-2 cursor-pointer text-sm block w-30 h-10"
-                        @click="showLogin">立即学习</button>
+                        @click="goToWordBook">立即学习</button>
                     <button
-                        class="bg-indigo-700 text-white rounded-[100px] px-4 py-2 cursor-pointer text-sm block w-30 h-10">查看课程</button>
+                        class="bg-indigo-700 text-white rounded-[100px] px-4 py-2 cursor-pointer text-sm block w-30 h-10"
+                        @click="goToCourses">查看课程</button>
                 </div>
             </div>
             <div class="relative z-8 p-8">
@@ -92,8 +93,10 @@ import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { onMounted, reactive } from 'vue'// 🔧 注册滚动触发器插件
 import { useLogin } from '@/hooks/useLogin.ts'
+import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 gsap.registerPlugin(ScrollTrigger)
+const router = useRouter()
 
 // 📊 统计数据 - 用于数字滚动动画
 const stats = reactive([
@@ -206,6 +209,12 @@ const initProject = () => {
     })
 }
 const { login } = useLogin()
+const goToWordBook = () => {
+    router.push('/word-book/index')
+}
+const goToCourses = () => {
+    router.push('/courses/index')
+}
 const showLogin = () => {
     login().then(() => {
         console.log('登录成功')

@@ -1,0 +1,77 @@
+import type { PerformanceDto, TrackerConfig } from "@en/common/tracker";
+import { onINP, onCLS } from "web-vitals";
+import { report } from "@/report";
+export const reportPerformance = async (
+  visitorId: string,
+  config: TrackerConfig,
+) => {
+  let fp = 0; //FP 首次绘制时间
+  let fcp = 0; //FCP 首次内容绘制时间
+  let lcp = 0; //LCP 最大内容绘制时间
+  let inp = 0; //INP 交互性能指标
+  let cls = 0; //CLS 累积布局偏移
+  const url = config.baseUrl + config.performance.api;
+  const performanceEntries = performance.getEntriesByType("paint");
+  const fpEntry = performanceEntries.find(
+    (entry) => entry.name === "first-paint",
+  );
+  const fcpEntry = performanceEntries.find(
+    (entry) => entry.name === "first-contentful-paint",
+  );
+  if (fpEntry) {
+    fp = fpEntry.startTime;
+  }
+  if (fcpEntry) {
+    fcp = fcpEntry.startTime;
+  }
+  // 监听LCP
+  const lcpPromise = new Promise<{
+    lcpTime: number;
+    lcpObserver: PerformanceObserver;
+  }>((resolve) => {
+    let lcpObserver = new PerformanceObserver((entryList) => {
+      resolve({
+        lcpTime: entryList.getEntries().at(-1)?.startTime ?? 0,
+        lcpObserver,
+      });
+    });
+
+    lcpObserver.observe({
+      type: "largest-contentful-paint",
+      buffered: true,
+    });
+  });
+  const { lcpTime, lcpObserver } = await lcpPromise;
+  lcpObserver.disconnect();
+  lcp = lcpTime;
+
+  onINP(
+    (metric) => {
+      inp = metric.value;
+    },
+    { reportAllChanges: true },
+  );
+  onCLS(
+    (metric) => {
+      cls = metric.value;
+    },
+    { reportAllChanges: true },
+  );
+  window.addEventListener(
+    "visibilitychange",
+    () => {
+      if (document.visibilityState === "hidden") {
+        const body: PerformanceDto = {
+          visitorId,
+          fp,
+          fcp,
+          lcp,
+          inp,
+          cls,
+        };
+        report(url, body);
+      }
+    },
+    { once: true },
+  );
+};

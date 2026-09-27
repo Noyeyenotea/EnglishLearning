@@ -7,6 +7,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { AuthGuard } from './auth/auth.guard';
 import { MinioModule } from './minio/minio.module';
 import { PayModule } from './pay/pay.module';
+import { EmailModule } from './email/email.module';
 @Global()
 @Module({
   providers: [SharedService, AuthGuard],
@@ -18,13 +19,14 @@ import { PayModule } from './pay/pay.module';
     AuthGuard,
     MinioModule,
     PayModule,
+    EmailModule,
   ],
   imports: [
     PrismaModule,
     ResponseModule,
     ConfigModule.forRoot({
       isGlobal: true,
-      envFilePath: '.env',
+      envFilePath: ['.env', 'server/.env'],
     }),
     JwtModule.registerAsync({
       imports: [ConfigModule],
@@ -37,6 +39,7 @@ import { PayModule } from './pay/pay.module';
     }),
     MinioModule,
     PayModule,
+    EmailModule,
   ],
 })
 export class SharedModule {}

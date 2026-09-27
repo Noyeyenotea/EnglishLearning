@@ -147,7 +147,12 @@ export class UserService {
     const baseUrl = isHttps ? 'https' : 'http';
     const port = this.configService.get<string>('MINIO_PORT');
     const databaseUrl = `/${bucket}/${fileName}`;
-    const previewUrl = `${baseUrl}://${this.configService.get<string>('MINIO_ENDPOINT')}:${port}${databaseUrl}`;
+    // 优先使用 MINIO_PUBLIC_URL（如 https://47.103.125.49/minio），用于浏览器预览
+    // 回退到 MINIO_ENDPOINT + MINIO_PORT，仅供后端内部访问
+    const publicUrl = this.configService.get<string>('MINIO_PUBLIC_URL');
+    const previewUrl = publicUrl
+      ? `${publicUrl.replace(/\/$/, '')}${databaseUrl}`
+      : `${baseUrl}://${this.configService.get<string>('MINIO_ENDPOINT')}:${port}${databaseUrl}`;
     return this.response.success({
       previewUrl,
       databaseUrl,

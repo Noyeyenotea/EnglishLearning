@@ -7,7 +7,10 @@
         <h1 class="text-3xl font-bold text-zinc-900 tracking-tight sm:text-4xl">精选课程</h1>
         <p class="mt-3 text-zinc-500 text-sm max-w-md mx-auto">一次购买，长期有效 · 覆盖高考、考研、四六级、托福雅思等</p>
       </header>
-
+      <el-tabs type="card" v-model="currentTab" @tab-change="getList">
+        <el-tab-pane name="list" label="精选课程"></el-tab-pane>
+        <el-tab-pane v-if="userStore.user?.id" name="my" label="我的课程"></el-tab-pane>
+      </el-tabs>
       <!-- 课程卡片 3 列 -->
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
         <article v-for="item in list" :key="item.id"
@@ -30,7 +33,7 @@
             <button type="button"
               class="mt-4 w-full py-2.5 rounded-xl text-sm font-medium text-indigo-600 border border-indigo-200 bg-white hover:bg-indigo-50 transition-colors cursor-pointer"
               @click="openPay(item)">
-              {{ selectedCourse ? '购买课程' : '查看课程' }}
+              {{ currentTab === 'list' ? '购买课程' : '学习课程' }}
             </button>
           </div>
         </article>
@@ -42,17 +45,27 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
 import type { CourseList } from '@en/common/course';
-import { getCourseList } from '@/apis/course';
+import { getCourseList, getMyCourse } from '@/apis/course';
 import { uploadUrl } from '@/apis';
 import { useLogin } from '@/hooks/useLogin';
-
+import { useUserStore } from '@/stores/user';
+import router from '@/router';
+const userStore = useUserStore();
 import type { Course } from '@en/common/course';
 import CoursePay from './components/Pay.vue';
 const selectedCourse = ref<Course | null>(null); //选中的课程
+const currentTab = ref('list');
 const list = ref<CourseList>([]);
 const getList = async () => {
-  const res = await getCourseList();
-  list.value = res.data;
+  if (currentTab.value === 'list') {
+    const res = await getCourseList();
+    list.value = res.data;
+  } else {
+    console.log(currentTab.value);
+
+    const res = await getMyCourse();
+    list.value = res.data;
+  }
 }
 const imageSrc = (url: string) => {
   return uploadUrl + url;
@@ -61,8 +74,12 @@ const isVisiable = ref(false)
 const { login } = useLogin();
 const openPay = async (course: Course) => {
   await login();
-  selectedCourse.value = course;
-  isVisiable.value = true;
+  if (currentTab.value === 'list') {
+    isVisiable.value = true;
+    selectedCourse.value = course;
+  } else {
+    router.push(`/courses/learn/${course.id}/${course.name}`);
+  }
 }
 onMounted(() => {
   getList();

@@ -4,10 +4,9 @@ export const timeout = 50000;
 import { useUserStore } from "@/stores/user";
 import { refreshTokenApi } from "./user";
 import { ElMessage } from "element-plus";
-export const uploadUrl = import.meta.env.DEV
-  ? "http://10.98.153.244::9000"
-  : "http://线上地址待定";
-//刷新token接口
+export const uploadUrl = import.meta.env.VITE_MINIO_ENDPOINT;
+export const socketUrl = import.meta.env.VITE_SOCKET_URL;
+
 export const refreshApi = axios.create({
   baseURL: "/api/v1",
   timeout,

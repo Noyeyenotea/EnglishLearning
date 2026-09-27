@@ -62,12 +62,14 @@
 
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, watch } from 'vue'
 import type { Course } from '@en/common/course';
 import { uploadUrl } from '@/apis';
 import { ElMessage } from 'element-plus';
 import type { CreatePayDto } from '@en/common/pay';
 import { createPay } from '@/apis/pay';
+import { useSocket } from '@/hooks/useSoket';
+const { getSocket } = useSocket();
 const imageSrc = (url: string) => {
   return uploadUrl + url;
 }
@@ -100,7 +102,9 @@ const onConfirm = async () => {
 
 }
 const close = () => {
-
+  modelValue.value = false;
+  isPay.value = false;
+  timeExpire.value = 0;
 }
 //倒计时结束说明超时了，提示用户重新支付
 const tips = () => {
@@ -108,5 +112,18 @@ const tips = () => {
   timeExpire.value = 0;
   isPay.value = false;
 }
-
+watch(modelValue, (newVal) => {
+  const socket = getSocket();
+  if (newVal) {
+    socket?.on('paymentSuccess', () => {
+      ElMessage.success({
+        message: '支付成功',
+        duration: 10000 //10秒后自动关闭
+      });
+      close();
+    });
+  } else {
+    socket?.off('paymentSuccess');
+  }
+})
 </script>

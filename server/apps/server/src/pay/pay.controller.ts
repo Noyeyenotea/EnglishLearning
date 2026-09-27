@@ -15,8 +15,8 @@ export class PayController {
   }
 
   @All('notify')
-  notify(@Req() req: Request) {
-    console.log(req.body);
-    return this.payService.notify(req.body);
+  notify(@Body() body: unknown) {
+    console.log(body);
+    return this.payService.notify(body);
   }
 }

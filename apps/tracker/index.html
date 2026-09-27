@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    <h1>你好</h1>
+    <button>button</button>
+    <button><span>element plus</span></button>
+    <!-- 测试Push\replace\hashchange -->
+    <button onclick="history.pushState({}, '', '/home')">pushState</button>
+    <button onclick="history.replaceState({}, '', '/home')">
+      replaceState
+    </button>
+    <button onclick="window.location.hash = '#/home'">hashchange</button>
+    <button onclick="history.back()">back</button>
+    <button onclick="history.forward()">forward</button>
+  </body>
+  <script type="module" src="./index.ts"></script>
+</html>

@@ -3,4 +3,9 @@ packages:
   - "server"
   - "packages/*"
 allowBuilds:
+  '@parcel/watcher': set this to true or false
+  '@prisma/engines': set this to true or false
   esbuild: false
+  msgpackr-extract: set this to true or false
+  prisma: set this to true or false
+  unrs-resolver: set this to true or false
