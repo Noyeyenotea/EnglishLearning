@@ -1,0 +1,33 @@
+# ============================================
+# 部署目录 - Git 忽略规则
+# ============================================
+
+# 生产环境配置（包含敏感信息）
+deploy/.env.production
+deploy/.env
+
+# 构建缓存
+deploy/node_modules/
+deploy/.docker-cache/
+
+# 日志文件
+deploy/logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# 操作系统文件
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# 临时文件
+*.tmp
+*.bak
+*.orig
