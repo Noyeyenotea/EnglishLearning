@@ -34,7 +34,7 @@ services:
   # ---------- 前端 Nginx ----------
   web:
     build:
-      context: .
+      context: ..
       dockerfile: deploy/Dockerfile.web
       args:
         VITE_MINIO_ENDPOINT: ${VITE_MINIO_ENDPOINT:-http://47.103.125.49:9000}
@@ -46,7 +46,15 @@ services:
     networks:
       - english-network
     healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost/"]
+      test:
+        [
+          "CMD",
+          "wget",
+          "--no-verbose",
+          "--tries=1",
+          "--spider",
+          "http://localhost/",
+        ]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -60,7 +68,7 @@ services:
   # ---------- NestJS 服务端 ----------
   server:
     build:
-      context: .
+      context: ..
       dockerfile: deploy/Dockerfile.server
     container_name: english-server
     restart: unless-stopped
@@ -70,7 +78,7 @@ services:
       REDIS_PORT: 6379
       NODE_ENV: production
     env_file:
-      - deploy/.env.production
+      - .env.production
     ports:
       - "3000:3000"
     networks:
@@ -81,7 +89,15 @@ services:
       redis:
         condition: service_healthy
     healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000/api/v1/course"]
+      test:
+        [
+          "CMD",
+          "wget",
+          "--no-verbose",
+          "--tries=1",
+          "--spider",
+          "http://localhost:3000/api/v1/course",
+        ]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -133,8 +149,8 @@ services:
     volumes:
       - minio_data:/data
     ports:
-      - "9000:9000"   # API 端口
-      - "9001:9001"   # Console 管理端口
+      - "9000:9000" # API 端口
+      - "9001:9001" # Console 管理端口
     networks:
       - english-network
     command: server /data --console-address ":9001"
