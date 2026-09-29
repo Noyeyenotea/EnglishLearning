@@ -24,7 +24,8 @@ COPY apps/web/package.json ./apps/web/
 COPY apps/tracker/package.json ./apps/tracker/
 
 # 在工作区根目录安装依赖（必须根目录安装才能解析 workspace:*）
-RUN pnpm install --frozen-lockfile --shamefully-hoist
+# 不使用 --frozen-lockfile，让 pnpm 读取 package.json 的 onlyBuiltDependencies 配置
+RUN pnpm install --shamefully-hoist --no-frozen-lockfile
 
 # 复制全部源代码（包含 server 子目录、packages、apps）
 COPY . .
@@ -55,7 +56,8 @@ COPY packages/config/package.json ./packages/config/
 COPY packages/common ./packages/common
 COPY packages/config ./packages/config
 
-RUN pnpm install --prod --frozen-lockfile --shamefully-hoist
+# 不使用 --frozen-lockfile，让 pnpm 读取 package.json 的 onlyBuiltDependencies 配置
+RUN pnpm install --prod --shamefully-hoist --no-frozen-lockfile
 
 # 复制构建产物
 COPY --from=builder /app/server/dist ./dist
