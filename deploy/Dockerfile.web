@@ -20,11 +20,12 @@ ARG VITE_SOCKET_URL
 ENV VITE_MINIO_ENDPOINT=${VITE_MINIO_ENDPOINT}
 ENV VITE_SOCKET_URL=${VITE_SOCKET_URL}
 
-# 安装依赖
+# 仅复制清单文件以便利用 Docker 缓存
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 COPY apps/web/package.json ./apps/web/
 COPY apps/tracker/package.json ./apps/tracker/
-COPY packages/*/package.json ./packages/ 2>/dev/null || true
+COPY packages/common/package.json ./packages/common/
+COPY packages/config/package.json ./packages/config/
 
 RUN pnpm install --frozen-lockfile
 

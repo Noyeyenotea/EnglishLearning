@@ -1,28 +1,38 @@
 # ============================================
 # NestJS 服务端 - 生产环境 Dockerfile
 # ============================================
+# 仓库实际布局：
+#   - apps/{web,tracker}        前端工作区
+#   - packages/{common,config}  跨应用共享包（被 server 通过 workspace:* 引用）
+#   - server/                   NestJS 子仓库（内部含 apps/server、apps/ai、libs/shared）
+#   - server 自身只有一个 package.json（nest-cli.json 处理内部模块解析）
+# 因此所有 COPY 路径必须基于项目根（docker-compose context: ..）来写。
+
 FROM node:22-alpine AS builder
 
 WORKDIR /app
 
-# 安装依赖（先复制 package 文件以利用 Docker 缓存）
+# 安装 pnpm
+RUN npm install -g pnpm
+
+# 仅复制清单文件以便利用 Docker 缓存
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 COPY server/package.json ./server/
-COPY apps/server/package.json ./apps/server/
-COPY apps/ai/package.json ./apps/ai/
-COPY libs/shared/package.json ./libs/shared/
-COPY packages/*/package.json ./packages/ 2>/dev/null || true
+COPY packages/common/package.json ./packages/common/
+COPY packages/config/package.json ./packages/config/
+COPY apps/web/package.json ./apps/web/
+COPY apps/tracker/package.json ./apps/tracker/
 
-# 安装依赖
-RUN npm install -g pnpm && pnpm install --frozen-lockfile
+# 在工作区根目录安装依赖（必须根目录安装才能解析 workspace:*）
+RUN pnpm install --frozen-lockfile
 
-# 复制源代码
+# 复制全部源代码（包含 server 子目录、packages、apps）
 COPY . .
 
-# 生成 Prisma Client
+# 生成 Prisma Client（schema 在 server/prisma/）
 RUN cd server && pnpm prisma generate
 
-# 构建服务端
+# 构建服务端（nest build 按 nest-cli.json 输出到 server/dist/apps/server/main.js）
 RUN cd server && pnpm build
 
 # ============================================
@@ -32,9 +42,20 @@ FROM node:22-alpine AS production
 
 WORKDIR /app
 
-# 安装依赖用于运行（生产模式不安装 devDependencies）
-COPY server/package.json ./
-RUN npm install -g pnpm && pnpm install --prod --frozen-lockfile
+# 安装 pnpm
+RUN npm install -g pnpm
+
+# 在工作区根目录做生产模式安装，让 workspace:* 依赖能被正确链接
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+COPY server/package.json ./server/
+COPY packages/common/package.json ./packages/common/
+COPY packages/config/package.json ./packages/config/
+
+# 复制 workspace 包源码（pnpm 通过 symlink 引用，运行时必须存在）
+COPY packages/common ./packages/common
+COPY packages/config ./packages/config
+
+RUN pnpm install --prod --frozen-lockfile
 
 # 复制构建产物
 COPY --from=builder /app/server/dist ./dist
