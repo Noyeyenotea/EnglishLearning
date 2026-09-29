@@ -2,10 +2,15 @@ packages:
   - "apps/*"
   - "server"
   - "packages/*"
+
+# pnpm 11+ 用 allowBuilds 替代旧的 onlyBuiltDependencies
+# 值必须是 true 或 false，不能是占位符文本
 allowBuilds:
-  '@parcel/watcher': set this to true or false
-  '@prisma/engines': set this to true or false
+  '@parcel/watcher': true
+  '@prisma/client': true
+  '@prisma/engines': true
+  '@nestjs/core': true
   esbuild: false
-  msgpackr-extract: set this to true or false
-  prisma: set this to true or false
-  unrs-resolver: set this to true or false
+  msgpackr-extract: true
+  prisma: true
+  unrs-resolver: true

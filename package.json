@@ -13,17 +13,5 @@
     "concurrently": "^10.0.5",
     "dayjs": "^1.11.23",
     "md5": "^2.3.0"
-  },
-  "pnpm": {
-    "onlyBuiltDependencies": [
-      "@parcel/watcher",
-      "@prisma/client",
-      "@prisma/engines",
-      "msgpackr-extract",
-      "prisma",
-      "unrs-resolver",
-      "esbuild",
-      "@nestjs/core"
-    ]
   }
 }
